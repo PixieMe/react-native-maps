@@ -57,7 +57,7 @@ RCT_EXPORT_METHOD(showCallout:(nonnull NSNumber *)reactTag)
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
         id view = viewRegistry[reactTag];
         if (![view isKindOfClass:[AIRMapMarker class]]) {
-            RCTLogError(@"Invalid view returned from registry, expecting AIRMap, got: %@", view);
+            RCTLogError(@"Invalid view returned from registry, expecting AIRMapMarker, got: %@", view);
         } else {
             [(AIRMapMarker *) view showCalloutView];
         }
@@ -69,9 +69,24 @@ RCT_EXPORT_METHOD(hideCallout:(nonnull NSNumber *)reactTag)
     [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
         id view = viewRegistry[reactTag];
         if (![view isKindOfClass:[AIRMapMarker class]]) {
-            RCTLogError(@"Invalid view returned from registry, expecting AIRMap, got: %@", view);
+            RCTLogError(@"Invalid view returned from registry, expecting AIRMapMarker, got: %@", view);
         } else {
             [(AIRMapMarker *) view hideCalloutView];
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(openCalloutInMaps:(nonnull NSNumber *)reactTag)
+{
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
+        id view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[AIRMapMarker class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting AIRMapMarker, got: %@", view);
+        } else {
+            AIRMapMarker *marker = (AIRMapMarker *)view;
+            MKMapItem *mapItem = [[MKMapItem alloc] initWithPlacemark:[[MKPlacemark alloc] initWithCoordinate:marker.coordinate]];
+            mapItem.name = marker.title;
+            [MKMapItem openMapsWithItems:@[mapItem] launchOptions:@{MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDefault}];
         }
     }];
 }
