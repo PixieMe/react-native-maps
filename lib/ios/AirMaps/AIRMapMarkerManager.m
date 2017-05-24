@@ -84,7 +84,16 @@ RCT_EXPORT_METHOD(openCalloutInMaps:(nonnull NSNumber *)reactTag)
             RCTLogError(@"Invalid view returned from registry, expecting AIRMapMarker, got: %@", view);
         } else {
             AIRMapMarker *marker = (AIRMapMarker *)view;
-            MKMapItem *mapItem = [[MKMapItem alloc] initWithPlacemark:[[MKPlacemark alloc] initWithCoordinate:marker.coordinate]];
+            
+            MKPlacemark *placemark;
+            
+            if ([MKPlacemark instancesRespondToSelector:@selector(initWithCoordinate:)]) {
+                placemark = [[MKPlacemark alloc] initWithCoordinate:marker.coordinate];
+            } else {
+                placemark = [[MKPlacemark alloc] initWithCoordinate:marker.coordinate addressDictionary:nil];
+            }
+            
+            MKMapItem *mapItem = [[MKMapItem alloc] initWithPlacemark:placemark];
             mapItem.name = marker.title;
             [MKMapItem openMapsWithItems:@[mapItem] launchOptions:@{MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDefault}];
         }
