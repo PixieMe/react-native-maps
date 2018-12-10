@@ -21,6 +21,8 @@
 @property (nonatomic, weak) RCTBridge *bridge;
 @property (nonatomic, assign) MKCoordinateRegion initialRegion;
 @property (nonatomic, assign) MKCoordinateRegion region;
+@property (nonatomic, assign) GMSCameraPosition *cameraProp;   // Because the base class already has a "camera" prop.
+@property (nonatomic, assign) GMSCameraPosition *initialCamera;
 @property (nonatomic, assign) NSString *customMapStyleString;
 @property (nonatomic, assign) UIEdgeInsets mapPadding;
 @property (nonatomic, assign) NSString *paddingAdjustmentBehaviorString;
@@ -34,6 +36,8 @@
 @property (nonatomic, copy) RCTBubblingEventBlock onPoiClick;
 @property (nonatomic, copy) RCTDirectEventBlock onRegionChange;
 @property (nonatomic, copy) RCTDirectEventBlock onRegionChangeComplete;
+@property (nonatomic, copy) RCTDirectEventBlock onIndoorLevelActivated;
+@property (nonatomic, copy) RCTDirectEventBlock onIndoorBuildingFocused;
 @property (nonatomic, strong) NSMutableArray *markers;
 @property (nonatomic, strong) NSMutableArray *polygons;
 @property (nonatomic, strong) NSMutableArray *polylines;
@@ -50,6 +54,7 @@
 @property (nonatomic, assign) BOOL pitchEnabled;
 @property (nonatomic, assign) BOOL showsUserLocation;
 @property (nonatomic, assign) BOOL showsMyLocationButton;
+@property (nonatomic, assign) BOOL showsIndoors;
 @property (nonatomic, assign) BOOL showsIndoorLevelPicker;
 @property (nonatomic, assign) NSString *kmlSrc;
 
@@ -62,6 +67,7 @@
 - (void)didChangeCameraPosition:(GMSCameraPosition *)position;
 - (void)idleAtCameraPosition:(GMSCameraPosition *)position;
 - (void)didTapPOIWithPlaceID:(NSString *)placeID name:(NSString *) name location:(CLLocationCoordinate2D) location;
+- (NSArray *)getMapBoundaries;
 
 + (MKCoordinateRegion)makeGMSCameraPositionFromMap:(GMSMapView *)map andGMSCameraPosition:(GMSCameraPosition *)position;
 + (GMSCameraPosition*)makeGMSCameraPositionFromMap:(GMSMapView *)map andMKCoordinateRegion:(MKCoordinateRegion)region;
