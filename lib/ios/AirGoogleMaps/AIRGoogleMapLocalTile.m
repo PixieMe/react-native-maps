@@ -61,7 +61,11 @@ NSInteger TILE_SIZE = 256;
   NSUInteger xCoord = x;
   NSUInteger yCoord = y;
   int zCoord = (int)zoom;
-  bool shouldRescaleTile =  (zoom > self.maxZoom);
+
+  // This has been set to false (instead of zoom > self.maxScale).
+  // This is as the getRescaledTileBitmap leaks over a gb of memory on each use.
+  // At some point in the future, this should be revisited.
+  bool shouldRescaleTile = false;
 
   if (shouldRescaleTile) {
     int zSteps = (int)zCoord - self.maxZoom;
