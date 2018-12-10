@@ -132,6 +132,7 @@ class App extends React.Component {
   render() {
     return this.renderExamples([
       // [<component>, <component description>, <Google compatible>, <Google add'l description>]
+      [CustomTiles, 'Custom Tiles', true],
       [StaticMap, 'StaticMap', true],
       [DisplayLatLng, 'Tracking Position', true, '(incomplete)'],
       [ViewsAsMarkers, 'Arbitrary Views as Markers', true],
@@ -154,7 +155,6 @@ class App extends React.Component {
       [FitToSuppliedMarkers, 'Focus Map On Markers', true],
       [FitToCoordinates, 'Fit Map To Coordinates', true],
       [LiteMapView, 'Android Lite MapView'],
-      [CustomTiles, 'Custom Tiles', true],
       [ZIndexMarkers, 'Position Markers with Z-index', true],
       [MapStyle, 'Customize the style of the map', true],
       [LegalLabel, 'Reposition the legal label', true],

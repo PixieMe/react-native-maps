@@ -350,7 +350,7 @@ RCT_EXPORT_METHOD(takeSnapshot:(nonnull NSNumber *)reactTag
     } else {
       AIRGoogleMap *mapView = (AIRGoogleMap *)view;
 
-      // TODO: currently we are ignoring width, height, region
+      // TODO: currently we are ignoring width, height, region and result
 
       UIGraphicsBeginImageContextWithOptions(mapView.frame.size, YES, 0.0f);
       [mapView.layer renderInContext:UIGraphicsGetCurrentContext()];
@@ -415,7 +415,7 @@ RCT_EXPORT_METHOD(pointForCoordinate:(nonnull NSNumber *)reactTag
       AIRGoogleMap *mapView = (AIRGoogleMap *)view;
 
       CGPoint touchPoint = [mapView.projection pointForCoordinate:coord];
-      
+
       resolve(@{
                 @"x": @(touchPoint.x),
                 @"y": @(touchPoint.y),
@@ -442,7 +442,7 @@ RCT_EXPORT_METHOD(coordinateForPoint:(nonnull NSNumber *)reactTag
       AIRGoogleMap *mapView = (AIRGoogleMap *)view;
 
       CLLocationCoordinate2D coordinate = [mapView.projection coordinateForPoint:pt];
-      
+
       resolve(@{
                 @"latitude": @(coordinate.latitude),
                 @"longitude": @(coordinate.longitude),
