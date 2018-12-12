@@ -29,55 +29,78 @@ public class AirMapLocalTile extends AirMapFeature {
 
         public AIRMapLocalTileProvider(int tileSizet, String pathTemplate, int maxZoom) {
             this.tileSize = tileSizet;
-            this.pathTemplate = pathTemplate;
+            setPathTemplate(pathTemplate);
             this.maxZoom = maxZoom;
         }
 
         @Override
         public Tile getTile(int x, int y, int zoom) {
-            byte[] image = readTileImage(x, y, zoom);
-            boolean shouldRescaleTile = (zoom > this.maxZoom);
+            byte[] image = readClosestTileImage(x, y, zoom);
 
             if (image == null) {
                 return TileProvider.NO_TILE;
             }
 
-            if (shouldRescaleTile) {
-                Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-                Bitmap finalBitmap = this.getRescaledTileBitmap(bitmap, x, y, zoom);
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                finalBitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
-                byte[] bitmapData = stream.toByteArray();
-                return new Tile(this.tileSize, this.tileSize, bitmapData);
-            }
             return new Tile(this.tileSize, this.tileSize, image);
         }
 
         public void setPathTemplate(String pathTemplate) {
-            this.pathTemplate = pathTemplate;
+            this.pathTemplate = getContext().getFilesDir() + "/" + pathTemplate;
         }
 
         public void setTileSize(int tileSize) {
             this.tileSize = tileSize;
         }
 
-        private byte[] readTileImage(int x, int y, int zoom) {
+        /**
+         * Reads a tile image for this zoom level if one exists, or the closest at a higher zoom level
+         */
+        private byte[] readClosestTileImage(int x, int y, int zoom) {
             int xCoord = x;
             int yCoord = y;
             int zCoord = zoom;
-            boolean shouldRescaleTile = (zoom > this.maxZoom);
-            if (shouldRescaleTile) {
-                int zSteps = zCoord - this.maxZoom;
-                int relation = (int) Math.pow(2, zSteps) ;
-                xCoord = (x / relation);
-                yCoord = (y / relation);
-                zCoord = this.maxZoom;
-            }
 
             InputStream in = null;
             ByteArrayOutputStream buffer = null;
-            File dir = getContext().getFilesDir();
-            File file = new File(dir + "/" + getTileFilename(xCoord, yCoord, zCoord));
+            File file = new File(getTileFilename(xCoord, yCoord, zCoord));
+
+            // Find the closest tile to this zoom
+            while (!file.exists() && zCoord > 1)
+            {
+              xCoord /= 2;
+              yCoord /= 2;
+              zCoord = zCoord - 1;
+              file = new File(getTileFilename(xCoord, yCoord, zCoord));
+            }
+
+            // Finished searching without finding a tile file at any zoom level
+            if (!file.exists()) {
+                return null;
+            }
+
+            byte[] tileImage = readTileImage(xCoord, yCoord, zCoord);
+
+            // If the loaded tile isn't for the zoom requested then rescale it
+            if (zCoord != zoom) {
+                Bitmap sourceBitmap = BitmapFactory.decodeByteArray(tileImage, 0, tileImage.length);
+                Bitmap rescaledBitmap = getRescaledTileBitmap(sourceBitmap, x, y, zoom, zCoord);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                rescaledBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                tileImage = stream.toByteArray();
+            }
+
+            return tileImage;
+        }
+
+        private byte[] readTileImage(int x, int y, int zoom) {
+            InputStream in = null;
+            ByteArrayOutputStream buffer = null;
+            File file = new File(getTileFilename(x, y, zoom));
+
+            // Finished searching without finding a tile file at any zoom level
+            if (!file.exists()) {
+                return null;
+            }
 
             try {
                 in = new FileInputStream(file);
@@ -111,12 +134,12 @@ public class AirMapLocalTile extends AirMapFeature {
             return s;
         }
 
-        private Bitmap getRescaledTileBitmap(Bitmap image, int x, int y, int z) {
-            int zSteps = z - this.maxZoom;
+        private Bitmap getRescaledTileBitmap(Bitmap image, int targetX, int targetY, int targetZ, int sourceZ) {
+            int zSteps = targetZ - sourceZ;
             int relation = (int) Math.pow(2, zSteps);
             int cropSize = (this.tileSize / relation);
-            int cropX = (x % relation) * (this.tileSize / relation);
-            int cropY = (y % relation) * (this.tileSize / relation);
+            int cropX = (targetX % relation) * (this.tileSize / relation);
+            int cropY = (targetY % relation) * (this.tileSize / relation);
             int scaleSize = (relation <= MEM_MAX_SIZE) ? tileSize * relation : tileSize * MEM_MAX_SIZE;
             Bitmap croppedBitmap = Bitmap.createBitmap(image, cropX, cropY, cropSize, cropSize);
             return Bitmap.createScaledBitmap(croppedBitmap, scaleSize, scaleSize, false);
@@ -175,6 +198,7 @@ public class AirMapLocalTile extends AirMapFeature {
         options.zIndex(zIndex);
         this.tileProvider = new AirMapLocalTile.AIRMapLocalTileProvider((int)this.tileSize, this.pathTemplate, this.maxZoom);
         options.tileProvider(this.tileProvider);
+        options.fadeIn(true);
         return options;
     }
 
