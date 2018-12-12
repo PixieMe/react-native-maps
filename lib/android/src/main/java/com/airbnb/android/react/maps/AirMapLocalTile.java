@@ -84,9 +84,12 @@ public class AirMapLocalTile extends AirMapFeature {
             if (zCoord != zoom) {
                 Bitmap sourceBitmap = BitmapFactory.decodeByteArray(tileImage, 0, tileImage.length);
                 Bitmap rescaledBitmap = getRescaledTileBitmap(sourceBitmap, x, y, zoom, zCoord);
+                sourceBitmap.recycle();
+
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 rescaledBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 tileImage = stream.toByteArray();
+                rescaledBitmap.recycle();
             }
 
             return tileImage;
@@ -142,7 +145,9 @@ public class AirMapLocalTile extends AirMapFeature {
             int cropY = (targetY % relation) * (this.tileSize / relation);
             int scaleSize = (relation <= MEM_MAX_SIZE) ? tileSize * relation : tileSize * MEM_MAX_SIZE;
             Bitmap croppedBitmap = Bitmap.createBitmap(image, cropX, cropY, cropSize, cropSize);
-            return Bitmap.createScaledBitmap(croppedBitmap, scaleSize, scaleSize, false);
+            Bitmap scaled = Bitmap.createScaledBitmap(croppedBitmap, scaleSize, scaleSize, true);
+            croppedBitmap.recycle();
+            return scaled;
         }
     }
 
