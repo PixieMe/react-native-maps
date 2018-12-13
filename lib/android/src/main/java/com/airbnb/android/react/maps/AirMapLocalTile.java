@@ -65,7 +65,7 @@ public class AirMapLocalTile extends AirMapFeature {
             File file = new File(getTileFilename(xCoord, yCoord, zCoord));
 
             // Find the closest tile to this zoom
-            while (!file.exists() && zCoord > 1)
+            while (!file.exists() && zCoord > maxZoom)
             {
               xCoord /= 2;
               yCoord /= 2;
