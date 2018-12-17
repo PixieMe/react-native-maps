@@ -65,7 +65,7 @@ public class AirMapLocalTile extends AirMapFeature {
             File file = new File(getTileFilename(xCoord, yCoord, zCoord));
 
             // Find the closest tile to this zoom
-            while (!file.exists() && zCoord > maxZoom)
+            while (!file.exists() && zCoord > 1)
             {
               xCoord /= 2;
               yCoord /= 2;
@@ -87,7 +87,7 @@ public class AirMapLocalTile extends AirMapFeature {
                 sourceBitmap.recycle();
 
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                rescaledBitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                rescaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 tileImage = stream.toByteArray();
                 rescaledBitmap.recycle();
             }
@@ -145,7 +145,7 @@ public class AirMapLocalTile extends AirMapFeature {
             int cropY = (targetY % relation) * (this.tileSize / relation);
             int scaleSize = (relation <= MEM_MAX_SIZE) ? tileSize * relation : tileSize * MEM_MAX_SIZE;
             Bitmap croppedBitmap = Bitmap.createBitmap(image, cropX, cropY, cropSize, cropSize);
-            Bitmap scaled = Bitmap.createScaledBitmap(croppedBitmap, scaleSize, scaleSize, true);
+            Bitmap scaled = Bitmap.createScaledBitmap(croppedBitmap, scaleSize, scaleSize, false);
             croppedBitmap.recycle();
             return scaled;
         }

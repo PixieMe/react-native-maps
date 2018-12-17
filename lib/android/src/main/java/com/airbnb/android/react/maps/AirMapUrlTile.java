@@ -68,7 +68,7 @@ public class AirMapUrlTile extends AirMapFeature
 				}
 				catch (IOException e)
 				{
-					e.printStackTrace();
+					// We're probably not connected to the network
 				}
 				finally
 				{
