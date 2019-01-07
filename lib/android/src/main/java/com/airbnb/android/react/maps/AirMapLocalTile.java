@@ -25,7 +25,11 @@ public class AirMapLocalTile extends AirMapFeature {
         private static final int BUFFER_SIZE = 16 * 1024;
         private int tileSize;
         private String pathTemplate;
-
+        private ThreadLocal<byte[]> data = new ThreadLocal<byte[]>() {
+            @Override protected byte[] initialValue() {
+                return new byte[BUFFER_SIZE];
+            }
+        };
 
         public AIRMapLocalTileProvider(int tileSizet, String pathTemplate, int maxZoom) {
             this.tileSize = tileSizet;
@@ -108,12 +112,12 @@ public class AirMapLocalTile extends AirMapFeature {
             try {
                 in = new FileInputStream(file);
                 buffer = new ByteArrayOutputStream();
+                byte[] dataBuffer = data.get();
 
                 int nRead;
-                byte[] data = new byte[BUFFER_SIZE];
 
-                while ((nRead = in.read(data, 0, BUFFER_SIZE)) != -1) {
-                    buffer.write(data, 0, nRead);
+                while ((nRead = in.read(dataBuffer, 0, BUFFER_SIZE)) != -1) {
+                    buffer.write(dataBuffer, 0, nRead);
                 }
                 buffer.flush();
                 return buffer.toByteArray();

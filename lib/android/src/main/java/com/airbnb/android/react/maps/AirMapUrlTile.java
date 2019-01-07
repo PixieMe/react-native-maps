@@ -23,6 +23,14 @@ public class AirMapUrlTile extends AirMapFeature
 		private int width;
 		private int height;
 		private String urlTemplate;
+		private ThreadLocal<byte[]> data = new ThreadLocal<byte[]>()
+		{
+			@Override
+			protected byte[] initialValue()
+			{
+				return new byte[BUFFER_SIZE];
+			}
+		};
 
 		public AIRMapUrlTileProvider(
 			int width,
@@ -57,7 +65,7 @@ public class AirMapUrlTile extends AirMapFeature
 					outputStream = new ByteArrayOutputStream();
 
 					int nRead;
-					byte[] buffer = new byte[BUFFER_SIZE];
+					byte[] buffer = data.get();
 
 					while ((nRead = urlStream.read(buffer)) != -1)
 					{
