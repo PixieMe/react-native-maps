@@ -48,13 +48,15 @@ NSInteger TILE_SIZE = 256;
   CGRect cropRect = CGRectMake(cropX, cropY, cropSize, cropSize);
   CGImageRef croppedRef = CGImageCreateWithImageInRect([image CGImage], cropRect);
 
-  CGSize size = CGSizeMake(scaleSize, scaleSize);
-  UIGraphicsBeginImageContextWithOptions(size, NO, 1.0);
-  [[UIImage imageWithCGImage:croppedRef] drawInRect:CGRectMake(0, 0, size.width, size.height)];
+  // Create a cropped UIImage based on the cropped image ref, then release the imageRef.
+  UIImage *croppedImage = [UIImage imageWithCGImage:croppedRef];
   CGImageRelease(croppedRef);
-  UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  return newImage;
+
+  // Get the PNG data from the cropped image, and create a new image from that data scaled to the right size.
+  NSData *imageData = UIImagePNGRepresentation(croppedImage);
+  UIImage *scaledImage = [UIImage imageWithData:imageData scale:scaleSize];
+
+  return scaledImage;
 }
 
 - (UIImage *)tileForX:(NSUInteger)x y:(NSUInteger)y zoom:(NSUInteger)zoom {
@@ -62,10 +64,7 @@ NSInteger TILE_SIZE = 256;
   NSUInteger yCoord = y;
   int zCoord = (int)zoom;
 
-  // This has been set to false (instead of zoom > self.maxScale).
-  // This is as the getRescaledTileBitmap leaks over a gb of memory on each use.
-  // At some point in the future, this should be revisited.
-  bool shouldRescaleTile = false;
+  bool shouldRescaleTile = zoom > self.maxZoom;
 
   if (shouldRescaleTile) {
     int zSteps = (int)zCoord - self.maxZoom;
