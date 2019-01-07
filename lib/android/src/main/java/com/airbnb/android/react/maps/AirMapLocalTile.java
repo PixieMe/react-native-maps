@@ -21,7 +21,7 @@ public class AirMapLocalTile extends AirMapFeature {
 
     class AIRMapLocalTileProvider implements TileProvider {
         private int maxZoom;
-        private static final int MEM_MAX_SIZE = 8;
+        private static final int MEM_MAX_SIZE = 4;
         private static final int BUFFER_SIZE = 16 * 1024;
         private int tileSize;
         private String pathTemplate;
